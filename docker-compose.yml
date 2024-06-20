@@ -1,0 +1,51 @@
+version: '3' 
+ 
+services: 
+  db: 
+    image: mysql:8.0 
+    container_name: getstock_vn
+    ports: 
+      - 3306:3306 
+    expose: 
+      - 3306 
+    volumes: 
+      - ./db/data:/var/lib/mysql 
+    environment: 
+      - MYSQL_ROOT_PASSWORD=getfile 
+      - MYSQL_DATABASE=getfile 
+  be: 
+    build: 
+      context: ./get-stocks-be 
+      dockerfile: ./Dockerfile 
+    container_name: getstock_be 
+    image: getstock_be 
+    ports: 
+      - 3000:3000 
+    expose: 
+      - 3000 
+    volumes: 
+      - ./get-stocks-be:/app 
+      - ./get-stocks-be/.env:/app/.env 
+    depends_on: 
+      - db 
+  fe: 
+    build: 
+      context: ./get-stocks-fe 
+      dockerfile: ./Dockerfile 
+    container_name: getstock_fe 
+    image: getstock_fe
+    ports: 
+      - 3001:3001 
+    expose: 
+      - 3001 
+  apache:  
+    build:
+      context: ./apache   
+      dockerfile: ./Dockerfile
+    container_name: apache
+    image: apache 
+    ports:
+      - 80:80
+    depends_on: 
+      - be 
+      - fe

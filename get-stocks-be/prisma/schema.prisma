@@ -1,0 +1,286 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PackageType {
+  G
+  P
+  BOTH
+}
+
+enum OrderStatus {
+  PENDING
+  SUCCESS
+  FAIL
+}
+
+model GetStockItem {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  host      String
+  price     String      @default("0")
+  status    Boolean     @default(true)
+  type      String?
+  typePack  PackageType
+  props     String?     @db.Text
+  isPre     Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model JToken {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  rfToken    String    @db.VarChar(400)
+  expireTime DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model SystemConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DefaultData {
+  id        String   @id @default(uuid())
+  type      String
+  dataId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  username     String         @unique
+  password     String
+  firstName    String?
+  lastName     String?
+  phone        String?
+  // role         Role           @default(USER)
+  role         String
+  balanceG     Float?         @default(0)
+  balanceP     Float?         @default(0)
+  totalDeposit Float?         @default(0)
+  apiKey       String?        @db.VarChar(200)
+  isActive     Boolean        @default(true)
+  lastLogin    DateTime       @default(now())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  packageOrder PackageOrder?
+  ItemHistory  ItemHistory[]
+  OrderHistory OrderHistory[]
+}
+
+model PasswordReset {
+  id         String   @id @default(uuid())
+  userId     String
+  token      String?
+  isValid    Boolean  @default(false)
+  expireTime DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId])
+}
+
+model ItemHistory {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  systemId   String
+  system     System    @relation(fields: [systemId], references: [id])
+  itemDCode  String
+  provider   String
+  fileName   String
+  link       String
+  cost       Float     @default(0)
+  provSlug   String?
+  itemID     String?
+  itemType   String?
+  isPremium  Int?
+  extension  String
+  expireTime DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model OrderHistory {
+  id                String           @id @default(uuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id])
+  content           String
+  status            OrderStatus      @default(PENDING)
+  packageType       PackageType
+  packagePricingGId String?
+  packagePricingPId String?
+  packagePricingG   PackagePricingG? @relation(fields: [packagePricingGId], references: [id])
+  packagePricingP   PackagePricingP? @relation(fields: [packagePricingPId], references: [id])
+  provider          String
+  cardNumber        String?
+  phone             String?
+  reason            String?
+  cost              Float
+  costPayment       Float            @default(0)
+  currency          String           @default("vnd")
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model Payment {
+  id                String           @id @default(uuid())
+  packageType       PackageType      @default(G)
+  packageId         String
+  packagePricingG   PackagePricingG? @relation(fields: [packagePricingGId], references: [id])
+  packagePricingP   PackagePricingP? @relation(fields: [packagePricingPId], references: [id])
+  paymentType       String
+  bankId            String
+  bank              Bank?            @relation(fields: [bankId], references: [id])
+  momo              Momo?            @relation(fields: [momoId], references: [id])
+  content           String
+  momoId            String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  packagePricingGId String?
+  packagePricingPId String?
+}
+
+model Bank {
+  id         String    @id @default(uuid())
+  bankName   String
+  cardNumber String
+  username   String
+  host       String?
+  bankcode   String?
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Payment    Payment[]
+}
+
+model Momo {
+  id        String    @id @default(uuid())
+  username  String
+  phone     String
+  host      String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Payment   Payment[]
+}
+
+model PackageOrder {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  expireTime DateTime
+  dailyLeft  Int
+  downDaily  Int      @default(20)
+  isExpired  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model PackagePricingG {
+  id           String         @id @default(uuid())
+  name         String
+  balanceG     Float
+  balanceP     Float
+  price        Float
+  guideEn      String?        @db.Text
+  guideVn      String?        @db.Text
+  content      String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Payment      Payment[]
+  OrderHistory OrderHistory[]
+
+  @@unique([content])
+}
+
+model PackagePricingP {
+  id           String         @id @default(uuid())
+  name         String
+  dayExpires   Int
+  downPerDay   Int
+  guideEn      String?        @db.Text
+  guideVn      String?        @db.Text
+  price        Float
+  content      String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  Payment      Payment[]
+  OrderHistory OrderHistory[]
+
+  @@unique([content])
+}
+
+model Stock {
+  id         String      @id @default(uuid())
+  name       String
+  host       String
+  pathName   String?
+  system     System      @relation(fields: [systemId], references: [id])
+  systemId   String
+  isActive   Boolean     @default(true)
+  stockTypes StockType[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model StockType {
+  id        String      @id @default(uuid())
+  type      PackageType @default(G)
+  price     Float       @default(0)
+  stock     Stock       @relation(fields: [stockId], references: [id], onDelete: Cascade)
+  stockId   String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@unique([stockId, type])
+}
+
+model System {
+  id               String           @id @default(uuid())
+  name             String
+  enable           Boolean          @default(true)
+  host             String
+  email            String
+  username         String?
+  password         String           @db.VarChar(350)
+  token            String?          @db.VarChar(350)
+  refreshToken     String?          @db.VarChar(350)
+  balance          Float            @default(0)
+  systemProperties SystemProperty[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  Stock            Stock[]
+  ItemHistory      ItemHistory[]
+}
+
+model SystemProperty {
+  id        String   @id @default(uuid())
+  system    System   @relation(fields: [systemId], references: [id], onDelete: Cascade)
+  systemId  String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

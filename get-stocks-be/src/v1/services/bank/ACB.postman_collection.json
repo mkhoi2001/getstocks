@@ -1,0 +1,121 @@
+{
+	"info": {
+		"_postman_id": "5d763daf-27e1-4c5d-95cf-d8faa9de08a4",
+		"name": "ACB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "904195"
+	},
+	"item": [
+		{
+			"name": "LOGIN",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"rows\": 10,\r\n    \"username\": \"6554141\",\r\n    \"password\": \"{{pass}}\",\r\n    \"accountNo\": \"6554141\",\r\n    \"action\":\"login\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/api-acb/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api-acb",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "TRANSACTION",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"rows\": 10,\r\n    \"username\": \"6554141\",\r\n    \"password\": \"{{pass}}\",\r\n    \"accountNo\": \"6554141\",\r\n    \"action\":\"transactions\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/api-acb/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api-acb",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BALANCE",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"rows\": 10,\r\n    \"username\": \"6554141\",\r\n    \"password\": \"{{pass}}\",\r\n    \"accountNo\": \"6554141\",\r\n    \"action\":\"balance\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost/api-acb/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"api-acb",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "pass",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

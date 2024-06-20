@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `itemhistory` ADD COLUMN `isPremium` INTEGER NULL,
+    ADD COLUMN `itemID` VARCHAR(191) NULL,
+    ADD COLUMN `itemType` VARCHAR(191) NULL,
+    ADD COLUMN `provSlug` VARCHAR(191) NULL;

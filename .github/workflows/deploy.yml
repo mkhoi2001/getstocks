@@ -1,0 +1,35 @@
+name: Graphics
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install sshpass and prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass docker.io
+
+      - name: SSH connection and deploy
+        run: |
+          sshpass -p ${{ secrets.SERVER_PASSWORD }} scp -r ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/www/wwwroot/getstock
+
+      - name: SSH into server and execute commands
+        run: |
+          sshpass -p ${{ secrets.SERVER_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            # Install Node.js 20
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            # Change directory to deployment path
+            cd /www/wwwroot/getstock
+            # Start containers Docker
+            docker-compose up -d
+          EOF
